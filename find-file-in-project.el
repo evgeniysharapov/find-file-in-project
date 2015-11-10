@@ -308,7 +308,7 @@ This overrides variable `ffip-project-root' when set.")
       (setq rlt (ivy-read prompt collection))))
     rlt))
 
-(defun ffip-project-search (keyword NUM)
+(defun ffip-project-search (keyword find-directory)
   "Return an alist of all filenames in the project and their path.
 
 Files with duplicate filenames are suffixed with the name of the
@@ -321,12 +321,15 @@ directory they are found in so that they are unique."
                                     (error "No project root found")))))
     (cd (file-name-as-directory root))
     ;; make the prune pattern more general
-    (setq cmd (format "%s . \\( %s \\) -prune -o -type f %s %s %s %s -print"
+    (setq cmd (format "%s . \\( %s \\) -prune -o -type %s %s %s %s -print"
                       (if ffip-find-executable ffip-find-executable (ffip--guess-gnu-find))
                       (ffip--prune-patterns)
+                      (if find-directory "d" "f")
                       (ffip--join-patterns ffip-patterns)
-                      (ffip--create-filename-pattern-for-gnufind keyword)
-                      (if (and NUM (> NUM 0)) (format "-mtime -%d" NUM) "")
+                      ;; When finding directory, the keyword is like:
+                      ;; "proj/hello/world"
+                      (if find-directory (format "-iwholename \"*%s\"" keyword)
+                          (ffip--create-filename-pattern-for-gnufind keyword))
                       ffip-find-options))
 
     (if ffip-debug (message "run cmd at %s: %s" default-directory cmd))
@@ -346,16 +349,17 @@ directory they are found in so that they are unique."
     (cd old-default-directory)
     rlt))
 
-(defun ffip-find-files (keyword NUM)
-  (let* ((project-files (ffip-project-search keyword NUM))
+(defun ffip-find-files (keyword NUM &optional find-directory)
+  (let* ((project-files (ffip-project-search keyword find-directory))
          (files (mapcar 'car project-files))
          file root)
     (cond
      ((and files (> (length files) 0))
       (setq root (file-name-nondirectory (directory-file-name (or ffip-project-root (ffip-project-root)))))
-      (setq file (ffip-completing-read (format "Find file in %s/: " root)  files))
-      (find-file (cdr (assoc file project-files))))
-     (t (message "No match file exist!")))
+      (setq file (ffip-completing-read (format "Find in %s/: " root)  files))
+      (if find-directory (dired-other-window (cdr (assoc file project-files)))
+          (find-file (cdr (assoc file project-files)))))
+     (t (message "Nothing found!")))
     ))
 
 ;;;###autoload
@@ -367,7 +371,9 @@ directory they are found in so that they are unique."
 ;;;###autoload
 (defun find-file-in-project (&optional NUM)
   "Prompt with a completing list of all files in the project to find one.
-If NUM is given, only files modified NUM days before will be selected.
+If NUM is 2, split window below and open file in that window;
+if NUM is 3, split window right and open file in that window;
+If NUM is neither 2 or 3, open file in current window.
 
 The project's scope is defined as the first directory containing
 a `ffip-project-file' (It's value is \".git\" by default.
@@ -392,7 +398,7 @@ If no region is selected, you need provide keyword.
 Keyword could be ANY part of the file's full path and support wildcard.
 For example, to find /home/john/proj1/test.js, below keywords are valid:
 - test.js
-- orj1/tes
+- roj1/tes
 - john*test
 
 If NUM is given, only files modified NUM days before will be selected."
@@ -401,6 +407,27 @@ If NUM is given, only files modified NUM days before will be selected."
                      (buffer-substring-no-properties (region-beginning) (region-end))
                    (read-string "Enter keyword:"))))
     (ffip-find-files keyword num)))
+
+;;;###autoload
+(defun find-directory-in-project-by-selected (&optional num)
+  "Similar to find-file-in-project-by-selected.
+Use string from selected region to find directory in the project.
+If no region is selected, you need provide keyword.
+
+Keyword could be directory's base-name only or parent-directoy+base-name
+For example, to find /home/john/proj1/test, below keywords are valid:
+- test
+- roj1/test
+- john*test
+
+If NUM is 2, split window below and open directory in that window;
+if NUM is 3, split window right and open directory in that window;
+If NUM is neither 2 or 3, open directory in current window."
+  (interactive "P")
+  (let ((keyword (if (region-active-p)
+                     (buffer-substring-no-properties (region-beginning) (region-end))
+                   (read-string "Enter keyword:"))))
+    (ffip-find-files keyword num t)))
 
 ;;;###autoload
 (defalias 'ffip 'find-file-in-project)
