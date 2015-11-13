@@ -38,7 +38,7 @@
 ;;
 ;; Usage,
 ;;   - `M-x find-file-in-project-by-selected' use the selected region
-;;      as the keyword to search. Or you need provide the keyword
+;;      as the keyword to search.  Or you need provide the keyword
 ;;      if no region selected.
 ;;   - `M-x find-file-in-project' will start search immediately
 ;;
@@ -95,16 +95,16 @@
     ffip-filename-camelcase-to-dashes))
 
 ;;;###autoload
-(defvar ffip-find-executable nil "Path of GNU find. If nil, we will find `find' path automatically")
+(defvar ffip-find-executable nil "Path of GNU find.  If nil, we will find `find' path automatically.")
 
 ;;;###autoload
 (defvar ffip-project-file '(".svn" ".git" ".hg")
   "The file that should be used to define a project root.
-May be set using .dir-locals.el. Checks each entry if set to a list.")
+May be set using .dir-locals.el.  Checks each entry if set to a list.")
 
 ;;;###autoload
 (defvar ffip-prefer-ido-mode nil
-  "Use ido-mode instead of ivy-mode for displaying candidates.")
+  "Use `ido-mode' instead of `ivy-mode' for displaying candidates.")
 
 ;;;###autoload
 (defvar ffip-patterns nil
@@ -193,7 +193,7 @@ This overrides variable `ffip-project-root' when set.")
 (defvar ffip-full-paths t
   "If non-nil, show fully project-relative paths.")
 
-(defvar ffip-debug nil "Print debug information")
+(defvar ffip-debug nil "Print debug information.")
 
 ;;;###autoload
 (defun ffip-project-root ()
@@ -218,7 +218,7 @@ This overrides variable `ffip-project-root' when set.")
 
 ;;;###autoload
 (defun ffip-filename-camelcase-to-dashes (keyword)
-  " HelloWorld => hello-world"
+  "HelloWorld => hello-world."
   (let (rlt
         (old-flag case-fold-search))
     (setq case-fold-search nil)
@@ -234,7 +234,7 @@ This overrides variable `ffip-project-root' when set.")
 
 ;;;###autoload
 (defun ffip-filename-dashes-to-camelcase (keyword)
-  " hello-world => HelloWorld "
+  "hello-world => HelloWorld."
   (let (rlt)
     (setq rlt (mapconcat (lambda (s) (capitalize s)) (split-string keyword "-") ""))
 
@@ -363,13 +363,13 @@ directory they are found in so that they are unique."
     ))
 
 ;;;###autoload
-(defun ffip-current-full-filename-match-pattern-p (REGEX)
+(defun ffip-current-full-filename-match-pattern-p (regex)
   "Is current full file name (including directory) match the REGEX?"
   (let ((dir (if (buffer-file-name) (buffer-file-name) "")))
-    (string-match-p REGEX dir)))
+    (string-match-p regex dir)))
 
 ;;;###autoload
-(defun find-file-in-project (&optional NUM)
+(defun find-file-in-project (&optional num)
   "Prompt with a completing list of all files in the project to find one.
 If NUM is 2, split window below and open file in that window;
 if NUM is 3, split window right and open file in that window;
@@ -381,17 +381,17 @@ a `ffip-project-file' (It's value is \".git\" by default.
 You can override this by setting the variable `ffip-project-root'."
 
   (interactive "P")
-  (ffip-find-files nil NUM))
+  (ffip-find-files nil num))
 
 ;;;###autoload
 (defun ffip-get-project-root-directory ()
-  "Get the full path of project root directory"
+  "Get the full path of project root directory."
   (expand-file-name (or ffip-project-root
                         (ffip-project-root))))
 
 ;;;###autoload
 (defun find-file-in-project-by-selected (&optional num)
-  "Similar to find-file-in-project.
+  "Similar to `find-file-in-project'.
 But use string from selected region to search files in the project.
 If no region is selected, you need provide keyword.
 
@@ -410,7 +410,7 @@ If NUM is given, only files modified NUM days before will be selected."
 
 ;;;###autoload
 (defun find-directory-in-project-by-selected (&optional num)
-  "Similar to find-file-in-project-by-selected.
+  "Similar to `find-file-in-project-by-selected'.
 Use string from selected region to find directory in the project.
 If no region is selected, you need provide keyword.
 
