@@ -407,9 +407,15 @@ directory they are found in so that they are unique."
     rlt))
 
 (defun ffip-find-files (keyword open-another-window &optional find-directory)
-  (let* ((project-files (ffip-project-search keyword find-directory))
-         (files (mapcar 'car project-files))
-         file root)
+  (let* (project-files
+         files
+         lnum
+         file
+         root)
+
+    (if (string-match (key-wr)))
+    (setq project-files (ffip-project-search keyword find-directory))
+    (setq files (mapcar 'car project-files))
     (if (> (length files) 0)
         (progn
           (setq root (file-name-nondirectory
